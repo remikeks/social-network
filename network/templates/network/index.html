@@ -1,0 +1,54 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h1>All Posts</h1>
+    {% if user.is_authenticated %}
+    <div>
+        <form action="{% url 'new_post' %}" method="post">
+            {% csrf_token %}
+            <h3>New Post</h3>
+            <textarea name="new_post" rows="10" cols="50" required></textarea>
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+    {% endif %}
+
+    {% for post in page_obj %}
+        <div class="post">
+            <p><a href="{% url 'profile' post.poster.username %}">{{ post.poster }} </a></p>
+            <p id="content{{ post.id }}">{{ post.content }}</p>
+            <p>{{ post.timestamp }}</p>
+            <p><strong>Likes: </strong><span id="like{{post.id}}">{{ post.likes }}</span>
+            {% if user.is_authenticated %}
+                {% if user in post.liked_by.all %}
+                    <button class="like" id="post{{ post.id }}">Unlike</button>
+                {% else %}
+                    <button class="like" id="post{{ post.id }}">Like</button>
+                {% endif %}
+            {% endif %}
+        </p>
+            {% if user.username == post.poster.username %}
+                <button class="edit" id="{{ post.id }}">Edit</button>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; return to first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+    
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">go to last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+{% endblock %}
